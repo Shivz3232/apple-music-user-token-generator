@@ -1,6 +1,6 @@
 # Script to generate an Apple Music User Token
 
-The `Music-User-Token` header is required to call Apple Music's user specific APIs
+The `Music-User-Token` header is required to call Apple Music's user specific APIs. [Docs](https://developer.apple.com/documentation/applemusicapi/generating-developer-tokens)
 
 I could find tonnes of examples to generate the developer token, which is used in the `Authorization` header but none for the music user token!!!
 
