@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music User Token</title>
+    <link href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css" rel="stylesheet">
+
+    <style>
+      :root {
+        --apple-music-red: #f94c57;
+        --apple-music-gray: #c2cad7;
+      }
+
+      /* Custom tailwind utility classes for apple-music-red */
+      .apple-music-red-text {
+        color: var(--apple-music-red);
+      }
+
+      .apple-music-red-border {
+        border-color: var(--apple-music-red);
+      }
+
+      .apple-music-red-bg {
+        background-color: var(--apple-music-red);
+      }
+
+      .apple-music-red-hover:hover {
+        background-color: var(--apple-music-red);
+      }
+
+      .apple-music-red-focus:focus {
+        outline: 2px solid var(--apple-music-red);
+      }
+    </style>
+
+    <script>
+      let developerToken = ""
+      let music
+      let musicUserToken;
+
+      function storeDeveloperToken() {
+        developerToken = document.getElementById("developerToken").value;
+      }
+
+      document.addEventListener('musickitloaded', async function () {
+        // Call configure() to configure an instance of MusicKit on the Web.
+        try {
+          await MusicKit.configure({
+            developerToken: developerToken,
+            app: {
+              name: 'User App',
+              build: '1.0.0',
+            },
+          });
+        } catch (err) {
+          // Handle configuration error
+        }
+
+        // MusicKit instance is available
+        music = MusicKit.getInstance();
+        if (music != null) {
+          toggleMusicKitStatus(true)
+        }
+      });
+
+      async function getMusicUserToken() {
+        try {
+          await music.authorize()
+
+          const musicUserTokenElement = document.getElementById("userToken")
+          musicUserTokenElement.textContent = music.musicUserToken
+        } catch (error) {
+          console.log(error)
+          console.log("Failed to authorize")
+        }
+      }
+
+      // Function to dynamically load the Apple MusicKit script
+      function loadAppleMusicKit() {
+        // Create the script element
+        const script = document.createElement("script");
+        script.src = "https://js-cdn.music.apple.com/musickit/v3/musickit.js";
+        script.setAttribute("data-web-components", "");
+        script.async = true;
+
+        // Append the script to the head of the document
+        document.head.appendChild(script);
+
+        console.log("Apple MusicKit script loaded.");
+      }
+
+      function copyToClipboard() {
+        const tokenText = document.getElementById("userToken");
+        navigator.clipboard.writeText(tokenText.textContent).then(function() {
+          alert("Token copied to clipboard!");
+        }).catch(function(error) {
+          console.error("Error copying token: ", error);
+        });
+      }
+
+      // Function to toggle the "Apple MusicKit loaded" status (for demo purposes)
+      function toggleMusicKitStatus(status) {
+        const statusElement = document.getElementById("musicKitStatus");
+        const statusText = statusElement.querySelector("span");
+
+        // Toggle the text content and color based on the current state
+        if (status) {
+          statusText.textContent = "True";
+          statusText.classList.remove("text-red-500");
+          statusText.classList.add("text-green-500");
+        } else {
+          statusText.textContent = "False";
+          statusText.classList.remove("text-green-500");
+          statusText.classList.add("text-red-500");
+        }
+      }
+    </script>
+  </head>
+  <body class="bg-black">
+    <!-- Header -->
+    <div class="text-white py-5 px-5 border-b-2 apple-music-red-border">
+      <p>
+        <span class="font-bold text-2xl">Music User Token</span> generator for
+        <span class="font-bold apple-music-red-text">Apple Music</span>
+      </p>
+    </div>
+
+    <!-- Main content container -->
+    <div class="max-w-4xl mx-auto mt-10">
+      <!-- Setup section -->
+      <div class="my-8 p-6 rounded-lg shadow-lg text-black" style="background-color: var(--apple-music-gray);">
+        <h2 class="text-xl font-semibold">Setup MusicKit</h2>
+        <div class="mt-4">
+          <label for="developerToken" class="block text-gray-700">Developer Token</label>
+          <input
+            type="text"
+            name="developerToken"
+            id="developerToken"
+            class="mt-2 p-2 w-full rounded border border-gray-700 bg-gray-900 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-apple-music-red-border"
+            placeholder="Enter developer token"
+            oninput="storeDeveloperToken()"
+          />
+        </div>
+
+        <!-- Load Apple MusicKit Button -->
+        <div class="mt-6">
+          <button
+            class="w-full py-3 px-4 text-white rounded-lg apple-music-red-bg apple-music-red-hover focus:outline-none focus:ring-2 focus:ring-apple-music-red-border transition duration-300"
+            onclick="loadAppleMusicKit()"
+          >
+            Load
+          </button>
+        </div>
+      </div>
+
+      <!-- Status section -->
+      <div class="my-6 p-6 rounded-lg shadow-lg" id="musicKitStatus" style="background-color: var(--apple-music-gray);">
+        <p class="">Apple MusicKit loaded: <span class="font-semibold text-red-500">False</span></p>
+      </div>
+
+      <!-- Authorize Button -->
+      <div class="my-6">
+        <button
+          class="w-full py-3 px-4 apple-music-red-bg text-white rounded-lg apple-music-red-hover focus:outline-none focus:ring-2 focus:ring-apple-music-red-border transition duration-300"
+          onclick="getMusicUserToken()"
+        >
+          Authorize
+        </button>
+      </div>
+
+      <!-- User Token Section -->
+      <div class="my-6 p-6 rounded-lg shadow-lg" style="background-color: var(--apple-music-gray);">
+        <h4 class="text-lg font-semibold">Apple Music User Token</h4>
+        <div class="flex items-center justify-between mt-2">
+          <p id="userToken" class="text-gray-800 overflow-hidden text-ellipsis w-3/4">
+
+          </p>
+          <button onclick="copyToClipboard()" class="ml-4 py-2 px-4 apple-music-red-bg text-white rounded-lg apple-music-red-hover focus:outline-none focus:ring-2 focus:ring-apple-music-red-border transition duration-300">
+            Copy
+          </button>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
